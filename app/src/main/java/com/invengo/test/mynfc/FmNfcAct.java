@@ -3,7 +3,6 @@ package com.invengo.test.mynfc;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,20 +11,18 @@ import android.widget.Toast;
  * Created by LZR on 2019/8/22.
  */
 
-public class WrtNfcAct extends AppCompatActivity {
-	private final String TAG = "--Wrt--";
+public class FmNfcAct extends AppCompatActivity {
+	private final String TAG = "--Format--";
 	private TextView idtv;
 	private TextView txtv;
-	private EditText wrtv;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.act_wrt);
+		setContentView(R.layout.act_read);
 
 		idtv = (TextView) findViewById(R.id.nfcId);
 		txtv = (TextView) findViewById(R.id.nfcTxt);
-		wrtv = (EditText) findViewById(R.id.nfcWrt);
 
 		new NfcUtils(this);
 	}
@@ -42,26 +39,19 @@ public class WrtNfcAct extends AppCompatActivity {
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		processIntent(intent, wrtv.getText().toString());
+		processIntent(intent, "");
 	}
 
 	//  这块的processIntent() 就是处理卡中数据的方法
 	public void processIntent(Intent intent, String txt) {
 		try {
+			NfcUtils.formatNdefToTag(intent);
+			Toast.makeText(this, "格式化成功！", Toast.LENGTH_SHORT).show();
+
 			// 检测卡的id
 			String id = NfcUtils.readNFCId(intent);
 			idtv.setText(id);
-
-//			// 获取卡中原数据
-//			String result = NfcUtils.readNFCFromTag(intent);
-//			txtv.setText(result);
-
-			if (txt.length() > 0) {
-				NfcUtils.writeNFCToTag(txt, intent);	// 往卡中写数据
-				Toast.makeText(this, "写入成功", Toast.LENGTH_SHORT).show();
-				wrtv.setText("");
-				txtv.setText("");
-			}
+			txtv.setText("");
 		} catch (Exception e) {
 			String es = "Error : " + e.getMessage();
 			txtv.setText(es);

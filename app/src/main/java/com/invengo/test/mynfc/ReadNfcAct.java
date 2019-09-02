@@ -1,13 +1,8 @@
 package com.invengo.test.mynfc;
 
 import android.content.Intent;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,18 +45,11 @@ public class ReadNfcAct extends AppCompatActivity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		count ++;
-Toast.makeText(this, "----- " + count, Toast.LENGTH_SHORT).show();
 		processIntent(intent);
 	}
 
 	//  这块的processIntent() 就是处理卡中数据的方法
 	public void processIntent(Intent intent) {
-		Parcelable[] rawmsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-		NdefMessage msg = (NdefMessage) rawmsgs[0];
-		NdefRecord[] records = msg.getRecords();
-		String resultStr = new String(records[0].getPayload());
-		// 返回的是NFC检查到卡中的数据
-		Log.e(TAG, "processIntent: "+resultStr );
 		try {
 			// 检测卡的id
 			String id = NfcUtils.readNFCId(intent);
@@ -71,9 +59,11 @@ Toast.makeText(this, "----- " + count, Toast.LENGTH_SHORT).show();
 			String result = NfcUtils.readNFCFromTag(intent);
 			txtv.setText(result);
 
-			Toast.makeText(this, "读取成功" + count, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "读取成功-" + count, Toast.LENGTH_SHORT).show();
 		} catch (UnsupportedEncodingException e) {
-			Toast.makeText(this, "读取失败" + count, Toast.LENGTH_LONG).show();
+			String es = "Error : " + e.getMessage();
+			txtv.setText(es);
+			Toast.makeText(this, es, Toast.LENGTH_LONG).show();
 		}
 	}
 

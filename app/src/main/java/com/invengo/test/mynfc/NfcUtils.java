@@ -5,13 +5,13 @@ import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
+import android.nfc.tech.NdefFormatable;
 import android.nfc.tech.NfcA;
 import android.os.Build;
 import android.os.Parcelable;
@@ -19,8 +19,10 @@ import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Nfc工具类
@@ -88,16 +90,27 @@ public class NfcUtils {
 	}
 
 	/**
+	 * 读取nfcID
+	 */
+	public static String readNFCId(Intent intent) throws UnsupportedEncodingException {
+		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+		String id = ByteArrayToHexString(tag.getId());
+		return id;
+	}
+
+	/**
 	 * 读取NFC的数据
 	 */
 	public static String readNFCFromTag(Intent intent) throws UnsupportedEncodingException {
 		Parcelable[] rawArray = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 		if (rawArray != null) {
+			// 标签可能存储了多个NdefMessage对象，一般情况下只有一个NdefMessage对象
 			NdefMessage mNdefMsg = (NdefMessage) rawArray[0];
+
+			// 程序中只考虑了1个NdefRecord对象，若是通用软件应该考虑所有的NdefRecord对象
 			NdefRecord mNdefRecord = mNdefMsg.getRecords()[0];
 			if (mNdefRecord != null) {
-				String readResult = new String(mNdefRecord.getPayload(), "UTF-8");
-				return readResult;
+				return parseTextRecord(mNdefRecord);
 			}
 		}
 		return "";
@@ -106,26 +119,50 @@ public class NfcUtils {
 	/**
 	 * 往nfc写入数据
 	 */
-	public static void writeNFCToTag(String data, Intent intent) throws IOException, FormatException {
+	public static void writeNFCToTag(String data, Intent intent) throws Exception {
 		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 		Ndef ndef = Ndef.get(tag);
-		ndef.connect();
-		NdefRecord ndefRecord = null;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-			ndefRecord = NdefRecord.createTextRecord("zh-CN", data);
+		if (ndef == null) {
+			throw new Exception("非NDEF数据格式！");
+		} else {
+			ndef.connect();
+			if (ndef.isWritable()) {
+				// 创建要写入的NdefMessage对象
+				NdefRecord ndefRecord = createTextRecord(data);
+				NdefRecord[] records = {ndefRecord};
+				NdefMessage ndefMessage = new NdefMessage(records);
+
+				if (ndef.getMaxSize() < ndefMessage.toByteArray().length) {
+					ndef.close();
+					throw new Exception("NFC标签的空间不足！");
+				} else {
+					ndef.writeNdefMessage(ndefMessage);
+					ndef.close();
+				}
+			} else {
+				ndef.close();
+				throw new Exception("NFC标签是只读的！");
+			}
 		}
-		NdefRecord[] records = {ndefRecord};
-		NdefMessage ndefMessage = new NdefMessage(records);
-		ndef.writeNdefMessage(ndefMessage);
 	}
 
-	/**
-	 * 读取nfcID
-	 */
-	public static String readNFCId(Intent intent) throws UnsupportedEncodingException {
+	public static void formatNdefToTag(Intent intent) throws Exception {
 		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-		String id = ByteArrayToHexString(tag.getId());
-		return id;
+
+		// 获取可以格式化和向标签写入数据NdefFormatable对象
+		NdefFormatable format = NdefFormatable.get(tag);
+		if (format != null) {
+			try {
+				// 允许对标签进行IO操作
+				format.connect();
+				format.format(new NdefMessage(new NdefRecord[] {new NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, new byte[0], new byte[] {0})}));
+//				format.format(new NdefMessage(new NdefRecord[] {createTextRecord("NDEF")}));
+			} catch (Exception e) {
+				throw new Exception("NDEF格式化失败！");
+			}
+		} else {
+			throw new Exception("NFC标签不支持NDEF格式！");
+		}
 	}
 
 	/**
@@ -178,4 +215,77 @@ public class NfcUtils {
 			return;
 		}
 	}
+
+	// 创建一个封装要写入文本的NdefRecord对象  
+	private static NdefRecord createTextRecord(String text) {
+		//生成语言编码的字节数组，中文编码  
+		byte[] langBytes = Locale.CHINA.getLanguage().getBytes(Charset.forName("US-ASCII"));
+
+		//将要写入的文本以UTF_8格式进行编码
+		Charset utfEncoding = Charset.forName("UTF-8");
+
+		//由于已经确定文本的格式编码为UTF_8，所以直接将payload的第1个字节的第7位设为0
+		byte[] textBytes = text.getBytes(utfEncoding);
+		int utfBit = 0;
+
+		//定义和初始化状态字节
+		char status = (char) (utfBit + langBytes.length);
+
+		//创建存储payload的字节数组
+		byte[] data = new byte[1 + langBytes.length + textBytes.length];
+
+		//设置状态字节
+		data[0] = (byte) status;
+
+		//设置语言编码
+		System.arraycopy(langBytes, 0, data, 1, langBytes.length);
+
+		//设置实际要写入的文本
+		System.arraycopy(textBytes, 0, data, 1 + langBytes.length, textBytes.length);
+//Log.i("------", ByteArrayToHexString(data));
+
+		//根据前面设置的payload创建NdefRecord对象
+		NdefRecord record = new NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, new byte[0], data);
+		return record;
+	}
+
+	//  将纯文本内容从NdefRecord对象（payload）中解析出来  
+	public static String parseTextRecord(NdefRecord record) throws UnsupportedEncodingException {
+		//验证TNF是否为NdefRecord.TNF_WELL_KNOWN
+		if (record.getTnf() != NdefRecord.TNF_WELL_KNOWN) return "";
+
+		//验证可变长度类型是否为RTD_TEXT
+		if (!Arrays.equals(record.getType(), NdefRecord.RTD_TEXT)) return "";
+
+		//获取payload
+		byte[] payload = record.getPayload();
+		//下面代码分析payload：状态字节+ISO语言编码（ASCLL）+文本数据（UTF_8/UTF_16）
+		//其中payload[0]放置状态字节：如果bit7为0，文本数据以UTF_8格式编码，如果为1则以UTF_16编码
+		//bit6是保留位，默认为0
+		/*
+		* payload[0] contains the "Status Byte Encodings" field, per the
+		* NFC Forum "Text Record Type Definition" section 3.2.1.
+		*  
+		* bit7 is the Text Encoding Field.
+		*  
+		* if (Bit_7 == 0): The text is encoded in UTF-8 if (Bit_7 == 1):
+		* The text is encoded in UTF16
+		*  
+		* Bit_6 is reserved for future use and must be set to zero.
+		*  
+		* Bits 5 to 0 are the length of the IANA language code.
+		*/
+		String textEncoding = ((payload[0] & 0x80) == 0) ? "UTF-8" : "UTF-16";
+
+		//处理bit5-0。bit5-0表示语言编码长度（字节数）
+		int languageCodeLength = payload[0] & 0x3f;
+		String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
+
+		// 解析出实际的文本数据
+		String text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
+
+		// 返回文本数据
+		return text;
+	}
+
 }

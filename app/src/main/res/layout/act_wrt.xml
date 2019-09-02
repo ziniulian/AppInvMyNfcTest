@@ -29,14 +29,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <TextView
+    <!-- <TextView
         android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="标签原内容："/>
+        android:text="标签原内容："/> -->
 
     <TextView
         android:id="@+id/nfcTxt"
+        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
@@ -44,12 +45,13 @@
         android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="标签新内容："/>
+        android:text="标签内容："/>
 
     <EditText
         android:id="@+id/nfcWrt"
-        android:hint="请输入标签内容："
+        android:hint="请输入标签内容"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Test NFC!"/>
 
 </LinearLayout>

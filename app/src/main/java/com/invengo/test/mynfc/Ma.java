@@ -45,6 +45,20 @@ public class Ma extends AppCompatActivity {
 				startActivity(t);
 			}
 		});
+
+		findViewById(R.id.fmBtn).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent t = new Intent(Ma.this, FmNfcAct.class);
+				startActivity(t);
+			}
+		});
+	}
+
+	//在onNewIntent中处理由NFC设备传递过来的intent
+	@Override
+	protected void onNewIntent(Intent intent) {
+		return;
 	}
 
 }
