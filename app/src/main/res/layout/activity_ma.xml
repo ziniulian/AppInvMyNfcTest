@@ -42,4 +42,12 @@
         android:layout_height="wrap_content"
         android:text="格式化"/>
 
+    <Button
+        android:id="@+id/szBtn"
+        android:layout_marginTop="50dp"
+        android:padding="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="标签写入上限"/>
+
 </LinearLayout>

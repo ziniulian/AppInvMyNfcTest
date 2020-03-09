@@ -42,6 +42,14 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SizeNfcAct">
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

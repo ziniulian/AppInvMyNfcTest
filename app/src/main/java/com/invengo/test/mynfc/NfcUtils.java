@@ -146,6 +146,28 @@ public class NfcUtils {
 		}
 	}
 
+	/**
+	 * 读取NFC的数据
+	 */
+	public static int getTagSize(Intent intent) throws Exception {
+		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+		Ndef ndef = Ndef.get(tag);
+		int r = 0;
+		if (ndef == null) {
+			throw new Exception("非NDEF数据格式！");
+		} else {
+			ndef.connect();
+			if (ndef.isWritable()) {
+				r = ndef.getMaxSize();
+				ndef.close();
+			} else {
+				ndef.close();
+				throw new Exception("NFC标签是只读的！");
+			}
+		}
+		return r;
+	}
+
 	public static void formatNdefToTag(Intent intent) throws Exception {
 		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
