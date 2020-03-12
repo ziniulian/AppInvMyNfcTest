@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fom</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
+		<meta charset="utf-8" />
+
+		<link href="../css/base.css" rel="stylesheet" type="text/css" />
+		<link href="../css/s01.css" rel="stylesheet" type="text/css" />
+
+		<script src="../js/tools.js"></script>
+	</head>
+
+	<body>
+		<div id="boso" class="boso midOut Lc_noadr">
+			<div class="midTop"></div><!--
+			--><div id="txtDom" class="midSub mfs pmp">
+				-- 标签格式化 --
+				<br/><br/>
+				请放置标签 ...
+			</div>
+		</div>
+		<div id="memoDom" class="memo"></div>
+	</body>
+
+	<script type="text/javascript">
+		function init () {
+			tools.memo.bind(memoDom);
+			rfdo.rdy();
+		}
+
+		var dco = {
+			onNew: function () {
+				var o = JSON.parse(rfdo.tagFormat());
+				if (o.ok) {
+					txtDom.innerHTML = "标签ID : " + o.id;
+					txtDom.className = "midSub mfs txt";
+					tools.memo.show("格式化成功！");
+				} else {
+					txtDom.className = "midSub mfs pmp";
+					txtDom.innerHTML = "请放置标签 ...";
+					tools.memo.show("格式化失败 : " + o.msg);
+				}
+			},
+
+			back: function () {
+				location.href = "./home.html";
+			}
+		};
+
+		document.body.onload = init;
+	</script>
+</html>

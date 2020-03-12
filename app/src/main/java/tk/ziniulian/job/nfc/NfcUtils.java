@@ -1,4 +1,4 @@
-package com.invengo.test.mynfc;
+package tk.ziniulian.job.nfc;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -36,11 +36,6 @@ public class NfcUtils {
 	public static IntentFilter[] mIntentFilter = null;
 	public static PendingIntent mPendingIntent = null;
 	public static String[][] mTechList = null;
-
-	public NfcUtils(Activity activity) {
-		mNfcAdapter = NfcCheck(activity);
-		NfcInit(activity);
-	}
 
 	/**
 	 * 检查NFC是否打开
@@ -90,18 +85,30 @@ public class NfcUtils {
 	}
 
 	/**
-	 * 读取nfcID
+	 * 获取标签
 	 */
-	public static String readNFCId(Intent intent) throws UnsupportedEncodingException {
-		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-		String id = ByteArrayToHexString(tag.getId());
-		return id;
+	public static Tag getTag(Intent intent) {
+		return intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	}
+
+	/**
+	 * 读取标签ID
+	 */
+	public static String getId(Tag t) throws UnsupportedEncodingException {
+		return ByteArrayToHexString(t.getId());
 	}
 
 	/**
 	 * 读取NFC的数据
 	 */
-	public static String readNFCFromTag(Intent intent) throws UnsupportedEncodingException {
+	public static String read(Intent intent) throws UnsupportedEncodingException {
+		StringBuilder r = new StringBuilder();
+		Tag tag = getTag(intent);
+		String id = getId(tag);
+		r.append("{\"ok\":true,\"id\":\"");
+		r.append(id);
+		r.append("\",\"dat\":\"");
+
 		Parcelable[] rawArray = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 		if (rawArray != null) {
 			// 标签可能存储了多个NdefMessage对象，一般情况下只有一个NdefMessage对象
@@ -109,18 +116,23 @@ public class NfcUtils {
 
 			// 程序中只考虑了1个NdefRecord对象，若是通用软件应该考虑所有的NdefRecord对象
 			NdefRecord mNdefRecord = mNdefMsg.getRecords()[0];
+
 			if (mNdefRecord != null) {
-				return parseTextRecord(mNdefRecord);
+				r.append(parseTextRecord(mNdefRecord));
 			}
 		}
-		return "";
+
+		r.append("\"}");
+		return r.toString();
 	}
 
 	/**
 	 * 往nfc写入数据
 	 */
-	public static void writeNFCToTag(String data, Intent intent) throws Exception {
-		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	public static String wrt(String data, Intent intent) throws Exception {
+		String r = "{\"ok\":false}";
+		Tag tag = getTag(intent);
+
 		Ndef ndef = Ndef.get(tag);
 		if (ndef == null) {
 			throw new Exception("非NDEF数据格式！");
@@ -137,6 +149,7 @@ public class NfcUtils {
 					throw new Exception("NFC标签的空间不足！");
 				} else {
 					ndef.writeNdefMessage(ndefMessage);
+					r = "{\"ok\":true,\"id\":\"" + getId(tag) + "\"}";
 					ndef.close();
 				}
 			} else {
@@ -144,21 +157,23 @@ public class NfcUtils {
 				throw new Exception("NFC标签是只读的！");
 			}
 		}
+		return r;
 	}
 
 	/**
-	 * 读取NFC的数据
+	 * 获取NFC的写入限制
 	 */
-	public static int getTagSize(Intent intent) throws Exception {
-		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	public static String tagSize(Intent intent) throws Exception {
+		String r = "{\"ok\":false}";
+		Tag tag = getTag(intent);
+
 		Ndef ndef = Ndef.get(tag);
-		int r = 0;
 		if (ndef == null) {
 			throw new Exception("非NDEF数据格式！");
 		} else {
 			ndef.connect();
 			if (ndef.isWritable()) {
-				r = ndef.getMaxSize();
+				r = "{\"ok\":true,\"id\":\"" + getId(tag) + "\",\"size\":" + ndef.getMaxSize() + "}";
 				ndef.close();
 			} else {
 				ndef.close();
@@ -168,8 +183,12 @@ public class NfcUtils {
 		return r;
 	}
 
-	public static void formatNdefToTag(Intent intent) throws Exception {
-		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	/**
+	 * 格式化 NFC 标签
+	 */
+	public static String formatNdefToTag(Intent intent) throws Exception {
+		String r = "{\"ok\":false}";
+		Tag tag = getTag(intent);
 
 		// 获取可以格式化和向标签写入数据NdefFormatable对象
 		NdefFormatable format = NdefFormatable.get(tag);
@@ -179,13 +198,19 @@ public class NfcUtils {
 				format.connect();
 				format.format(new NdefMessage(new NdefRecord[] {new NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, new byte[0], new byte[] {0})}));
 //				format.format(new NdefMessage(new NdefRecord[] {createTextRecord("NDEF")}));
+
+				r = "{\"ok\":true,\"id\":\"" + getId(tag) + "\"}";
+				format.close();
 			} catch (Exception e) {
 				throw new Exception("NDEF格式化失败！");
 			}
 		} else {
 			throw new Exception("NFC标签不支持NDEF格式！");
 		}
+		return r;
 	}
+
+	/**********************************/
 
 	/**
 	 * 将字节数组转换为字符串

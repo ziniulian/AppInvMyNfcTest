@@ -1,0 +1,21 @@
+
+.pmp {
+	color: #999;
+	font-style: italic;
+}
+
+.txt {
+	text-align: left;
+	margin: 0 3%;
+	word-break: break-all;
+}
+
+.txar {
+	width: 90%;
+	height: 30%;
+	margin: 5% auto;
+	padding: 3%;
+	word-break: break-all;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
