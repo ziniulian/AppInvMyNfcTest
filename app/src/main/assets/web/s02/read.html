@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Read</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
+		<meta charset="utf-8" />
+
+		<link href="../css/base.css" rel="stylesheet" type="text/css" />
+		<link href="../css/s02.css" rel="stylesheet" type="text/css" />
+
+		<script src="../js/tools.js"></script>
+		<script src="../js/s02Conf.js"></script>
+
+		<style type="text/css">
+			.txt {
+				margin: 0 3%;
+				word-break: break-all;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="boso" class="sfs Lc_noadr">
+			<div id="txtDom", class="txt"></div><br/>
+			<div id="memoDom" class="memo"></div>
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		function init () {
+			tools.memo.bind(memoDom);
+			conf.init();
+			rfdo.rdy();
+		}
+
+		var dco = {
+			onNew: function () {
+				dco.read();
+			},
+
+			read: function () {
+				var o = JSON.parse(rfdo.read());
+				// o = {ok:true,dat:"YWG1FST9P1                                 Test00100001000012020031611580600001                             99"};
+				if (o.ok) {
+					txtDom.innerHTML = dco.parseCode(o.dat);
+				} else {
+					txtDom.innerHTML = "";
+					tools.memo.show("读取失败" + (o.msg ? (" : " + o.msg) : "！"));
+				}
+			},
+
+			parseCode: function (c) {
+				var r = "", i, o, t;
+				k = conf.split(c);
+				if (k && conf.checkCc(k)) {
+					try {
+						for (i = 0; i < k.length; i ++) {
+							o = conf.cont[i];
+							if (o.get) {
+								t = o.get(k, i);
+								if (t) {
+									r += "<br/>";
+									r += o.nam;
+									r += " : ";
+									r += t;
+									r += "<br/>";
+								}
+							}
+						}
+					} catch (e) {
+						r = "";
+					}
+				}
+				if (!r) {
+					tools.memo.show("解析失败 : " + c);
+				}
+				return r;
+			},
+
+			back: function () {
+				location.href = "./home.html";
+			}
+		};
+
+		document.body.onload = init;
+	</script>
+</html>

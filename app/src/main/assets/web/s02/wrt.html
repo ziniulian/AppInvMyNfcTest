@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Wrt</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
+		<meta charset="utf-8" />
+
+		<link href="../css/base.css" rel="stylesheet" type="text/css" />
+		<link href="../css/s02.css" rel="stylesheet" type="text/css" />
+
+		<script src="../js/tools.js"></script>
+		<script src="../js/s02Conf.js"></script>
+
+		<style type="text/css">
+		</style>
+	</head>
+
+	<body>
+		<div id="boso" class="sfs Lc_noadr">
+			<br/>
+			<div>&nbsp; 类别：<select id="clsDom" class="sfs sct" onchange="dco.chgCls(1);"></select></div><br/>
+			<div>&nbsp; 类型：<select id="typDom" class="sfs sct" onchange="dco.chgCls(2);"></select></div><br/>
+			<div>&nbsp; 型号：<select id="modDom" class="sfs sct" onchange="dco.chgCls(3);"></select></div><br/>
+			<div>&nbsp; 版本：<select id="verDom" class="sfs sct"></select></div><br/>
+			<div>&nbsp; QC：<select id="qcDom" class="sfs sct"></select></div><br/>
+			<div>&nbsp; 生产者：<select id="makDom" class="sfs sct"></select></div><br/>
+			<div>&nbsp; 写入人：<select id="wrtDom" class="sfs sct"></select></div><br/>
+			<textarea id="txarDom" class="sfs txar" placeholder="请输入序列号"></textarea><br/>
+			<div id="btnDom" class="btn btnn">写 &nbsp; 入</div>
+			<br/><div id="memoDom" class="momo2"></div><br/><br/>
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		function init () {
+			tools.memo.bind(memoDom);
+			dco.initDom();
+			rfdo.rdy();
+		}
+
+		var dco = {
+			onNew: function () {
+				btnDom.className = "btn";
+				btnDom.onclick = dco.wrt;
+			},
+
+			chgCls: function (n, v) {
+				var o, s;
+				if (v) {
+					switch (n) {
+						case 1:
+							clsDom.value = v;
+							break;
+						case 2:
+							typDom.value = v;
+							break;
+						case 3:
+							modDom.value = v;
+							break;
+					}
+				}
+
+				switch (n) {
+					case 1:
+						typDom.innerHTML = "";
+						o = conf.typ[clsDom.value].sub;
+						for (s in o) {
+							typDom.appendChild(dco.crtOp(o, s));
+						}
+					case 2:
+						modDom.innerHTML = "";
+						if (typDom.value) {
+							o = conf.typ[clsDom.value].sub[typDom.value].sub;
+							for (s in o) {
+								modDom.appendChild(dco.crtOp(o, s));
+							}
+						}
+					case 3:
+						verDom.innerHTML = "";
+						if (modDom.value) {
+							o = conf.typ[clsDom.value].sub[typDom.value].sub[modDom.value].sub;
+							for (s in o) {
+								verDom.appendChild(dco.crtOp(o, s));
+							}
+						}
+						break;
+				}
+			},
+
+			initDom: function () {
+				var d, s, i;
+				for (s in conf.typ) {
+					clsDom.appendChild(dco.crtOp(conf.typ, s));
+				}
+				for (s in conf.mem) {
+					wrtDom.appendChild(dco.crtOp(conf.mem, s));
+					for (i = 0; i < conf.mem[s].cls.length; i ++) {
+						switch (conf.mem[s].cls[i]) {
+							case 0:
+								qcDom.appendChild(dco.crtOp(conf.mem, s));
+								break;
+							case 1:
+								makDom.appendChild(dco.crtOp(conf.mem, s));
+								break;
+						}
+					}
+				}
+				dco.chgCls(1, "F");
+			},
+
+			crtOp: function (o, s) {
+				var d = document.createElement("option");
+				if (s && o) {
+					d.value = s;
+					d.innerHTML = o[s].nam || o[s];
+				}
+				return d;
+			},
+
+			crtCod: function () {
+				var r = "", s = clsDom.value;
+				if (s) {
+					r = conf.cont[0].v + conf.cont[1].v + s;
+					s = typDom.value;
+					if (s) {
+						r += s;
+						s = modDom.value;
+						if (s) {
+							r += s;
+							s = verDom.value;
+							if (s) {
+								r += s;
+								s = tools.trim(txarDom.value).replace(/\n/g, "");
+								if (s) {
+									if (s.match(/^[\x00-\xff]+$/g)) {
+										if (s.length <= 40) {
+											r += tools.strFormt(s, 40, " ");
+											s = makDom.value;
+											if (s) {
+												r += s;
+												s = qcDom.value;
+												if (s) {
+													r += s;
+													s = wrtDom.value;
+													if (s) {
+														r += tools.getTimStr2();
+														r += s;
+														r += "                             ";
+														r += conf.crtCc(r);
+													} else {
+														r = "";
+														tools.memo.show("写入人不能为空");
+													}
+												} else {
+													r = "";
+													tools.memo.show("QC不能为空");
+												}
+											} else {
+												r = "";
+												tools.memo.show("生产者不能为空");
+											}
+										} else {
+											r = "";
+											tools.memo.show("序列号长度不能大于40个字");
+										}
+									} else {
+										r = "";
+										tools.memo.show("序列号必须为ASCII字符");
+									}
+								} else {
+									r = "";
+									txarDom.value = "";
+									tools.memo.show("序列号不能为空");
+								}
+							} else {
+								r = "";
+								tools.memo.show("版本不能为空");
+							}
+						} else {
+							r = "";
+							tools.memo.show("型号不能为空");
+						}
+					} else {
+						r = "";
+						tools.memo.show("类型不能为空");
+					}
+				} else {
+					tools.memo.show("类别不能为空");
+				}
+				return r;
+			},
+
+			wrt: function () {
+				var s = dco.crtCod();
+				if (s) {
+					var o = JSON.parse(rfdo.wrt(s));
+					if (o.ok) {
+						tools.memo.show("写入成功！");
+					} else {
+						tools.memo.show("写入失败" + (o.msg ? (" : " + o.msg) : "！"));
+					}
+				}
+			},
+
+			back: function () {
+				location.href = "./home.html";
+			}
+		};
+
+		document.body.onload = init;
+	</script>
+</html>

@@ -74,8 +74,13 @@ tools = {
 		return r;
 	},
 
+	// 删除左右两端的空白字符
+	trim: function (s) {
+		return s.replace(/(^\s*)|(\s*$)/g, "");
+	},
+
 	// 获取当前时间的字符串
-	getTimStr: function () {
+	getTimStr: function (short) {
 		var date = new Date();
 		var s = date.getFullYear();
 		s += "-";
@@ -87,6 +92,18 @@ tools = {
 		s += ":";
 		s += tools.strFormt(date.getMinutes() + "", 2, "0");
 		s += ":";
+		s += tools.strFormt(date.getSeconds() + "", 2, "0");
+		return s;
+	},
+
+	// 获取当前时间的字符串
+	getTimStr2: function () {
+		var date = new Date();
+		var s = date.getFullYear();
+		s += tools.strFormt((date.getMonth() + 1) + "", 2, "0");
+		s += tools.strFormt(date.getDate() + "", 2, "0");
+		s += tools.strFormt(date.getHours() + "", 2, "0");
+		s += tools.strFormt(date.getMinutes() + "", 2, "0");
 		s += tools.strFormt(date.getSeconds() + "", 2, "0");
 		return s;
 	},

@@ -1,0 +1,35 @@
+.txar {
+	display: block;
+	width: 88%;
+	margin: 0 auto;
+	padding: 3%;
+	word-break: break-all;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.sct {
+	width: 50%;
+	padding: 1%;
+}
+
+.btn {
+	width: 88%;
+	margin: 0 auto;
+	text-align: center;
+	line-height: 2;
+	background: #FF0;
+	border: solid 0.06rem #999;
+}
+.btnn {
+	font-style: italic;
+	color: #777;
+	background: #CCC;
+}
+
+.momo2 {
+	width: 90%;
+	margin: 0 auto;
+	color: #F00;
+	word-break: break-all;
+}

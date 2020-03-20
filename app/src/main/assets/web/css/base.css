@@ -38,6 +38,7 @@ a:hover {
 	right: 1rem;
 	color: #F00;
 	z-index: 20;
+	word-break: break-all;
 }
 
 /*---------------------- 公共样式库 ----------------------*/
