@@ -1,9 +1,14 @@
 package com.invengo.test.mynfc;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.webkit.WebSettings;
@@ -20,6 +25,10 @@ import tk.ziniulian.util.Str;
 import static tk.ziniulian.job.nfc.NfcUtils.mNfcAdapter;
 
 public class Ma extends AppCompatActivity {
+	public static final int SCAN_ACTINT = 301;
+	public static final int SCAN_PRM = 302; // 相机权限
+	public static final int SDRW_PRM = 303;	// 内存卡读写权限
+
 	private String wrtxt = "";	// 写入内容
 	private Handler uh = new UiHandler();
 	private WebView wv;
@@ -70,7 +79,34 @@ public class Ma extends AppCompatActivity {
 		super.onNewIntent(intent);
 		w.setItn(intent);
 		sendUrl(EmUrl.Onn);
-		wv.loadUrl(Str.meg(EmUrl.Onn.toString()));
+	}
+
+	// 接收扫码结果
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == SCAN_ACTINT && resultCode == RESULT_OK) {
+			sendUrl(EmUrl.Scan, data.getStringExtra("scnDat"));
+		}
+	}
+
+	// 监听权限申请返回结果
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		switch (requestCode) {
+			case SCAN_PRM:
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					// 权限被用户同意，可以做你要做的事情了。
+					scan();
+				}
+			break;
+			case SDRW_PRM:
+				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					sendUrl(EmUrl.Wrt);
+				}
+				break;
+		}
 	}
 
 	@Override
@@ -109,6 +145,16 @@ public class Ma extends AppCompatActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		mNfcAdapter = null;
+	}
+
+	// 扫描二维码
+	public void scan () {
+		// 检查相机权限是否打开
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, SCAN_PRM);
+		} else {
+			startActivityForResult(new Intent(this, ScannerActivity.class), SCAN_ACTINT);
+		}
 	}
 
 	public Handler getHd() {

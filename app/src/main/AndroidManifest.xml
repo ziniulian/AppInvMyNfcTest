@@ -2,7 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.invengo.test.mynfc">
 
+    <!-- 写 SD 卡-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- NFC -->
     <uses-permission android:name="android.permission.NFC" />
+
+    <!-- 相机 -->
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:allowBackup="true"
@@ -24,6 +32,8 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ScannerActivity"></activity>
     </application>
 
 </manifest>

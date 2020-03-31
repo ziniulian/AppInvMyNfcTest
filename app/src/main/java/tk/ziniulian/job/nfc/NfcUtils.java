@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -43,13 +42,13 @@ public class NfcUtils {
 	public static NfcAdapter NfcCheck(Activity activity) {
 		NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(activity);
 		if (mNfcAdapter == null) {
-			Toast.makeText(activity, "设备不支持NFC功能!", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(activity, "设备不支持NFC功能!", Toast.LENGTH_SHORT).show();
 			return null;
 		} else {
 			if (!mNfcAdapter.isEnabled()) {
 				IsToSet(activity);
 			} else {
-				Toast.makeText(activity, "NFC功能已打开!", Toast.LENGTH_SHORT).show();
+//				Toast.makeText(activity, "NFC功能已打开!", Toast.LENGTH_SHORT).show();
 			}
 		}
 		return mNfcAdapter;

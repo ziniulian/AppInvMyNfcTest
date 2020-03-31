@@ -1,13 +1,20 @@
 package com.invengo.test.mynfc.entity;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 import com.invengo.test.mynfc.Ma;
 
 import tk.ziniulian.job.nfc.NfcUtils;
+import tk.ziniulian.util.dao.DbLocal;
+
+import static com.invengo.test.mynfc.Ma.SDRW_PRM;
 
 /**
  * 业务接口
@@ -18,10 +25,12 @@ public class Web {
 	private Ma ma;
 	private Handler h;
 	private Intent itn = null;
+	private DbLocal db;
 
 	public Web (Ma m) {
 		this.ma = m;
 		this.h = m.getHd();
+		this.db = new DbLocal(m, 1);
 	}
 
 	public void setItn(Intent t) {
@@ -47,6 +56,7 @@ public class Web {
 						r = NfcUtils.read(itn);
 						break;
 					case 2:
+						// 数据库记录
 						r = NfcUtils.wrt(txt, itn);
 						break;
 					case 3:
@@ -104,6 +114,50 @@ public class Web {
 	@JavascriptInterface
 	public void rdy () {
 		itn = null;
+	}
+
+	/**
+	 * 扫码
+	 */
+	@JavascriptInterface
+	public void scan () {
+		ma.scan();
+	}
+
+	/**
+	 * 检查内存卡读写权限是否打开
+	 */
+	@JavascriptInterface
+	public boolean checkSdPrm () {
+		if (ContextCompat.checkSelfPermission(ma, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+			return true;
+		} else {
+			ActivityCompat.requestPermissions(ma, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SDRW_PRM);
+			return false;
+		}
+	}
+
+	/**
+	 * 记录标签日志
+	 */
+	@JavascriptInterface
+	public void tagLog (String txt) {
+		this.db.addTag(txt);
+	}
+
+	@JavascriptInterface
+	public String kvGet (String k) {
+		return this.db.kvGet(k);
+	}
+
+	@JavascriptInterface
+	public void kvSet (String k, String v) {
+		this.db.kvSet(k, v);
+	}
+
+	@JavascriptInterface
+	public void kvDel (String k) {
+		this.db.kvDel(k);
 	}
 
 }

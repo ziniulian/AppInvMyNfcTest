@@ -27,6 +27,15 @@
 	background: #CCC;
 }
 
+.barBtn {
+	padding: 0 1rem 0.3rem 0;
+	text-align: right;
+	color: blue;
+}
+.barBtn a {
+	color: blue;
+}
+
 .momo2 {
 	width: 90%;
 	margin: 0 auto;

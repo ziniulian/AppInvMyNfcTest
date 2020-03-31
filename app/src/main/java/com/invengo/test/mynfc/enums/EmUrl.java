@@ -9,8 +9,10 @@ public enum EmUrl {
 	// 主页
 	Home("file:///android_asset/web/s02/home.html"),
 	Exit("file:///android_asset/web/s02/home.html"),
+	Wrt("file:///android_asset/web/s02/wrt.html"),
 	Err("file:///android_asset/web/s01/err.html"),
 	Onn("javascript: dco.onNew(\"<0>\");"),
+	Scan("javascript: dco.onScan(\"<0>\");"),
 	Memo("javascript: tools.memo.show(\"<0>\");"),
 	Back("javascript: dco.back();");
 
