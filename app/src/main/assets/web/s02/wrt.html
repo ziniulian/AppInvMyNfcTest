@@ -234,6 +234,14 @@
 
 			onScan: function (dat) {
 				txarDom.value = dat;
+				var a = conf.parseBm(dat);
+				if (a) {
+					for (var i = 0; i < a.length; i ++) {
+						dco.chgCls(i + 1, a[i]);
+					}
+				} else {
+					dco.chgCls(1, "D");
+				}
 			},
 
 			back: function () {

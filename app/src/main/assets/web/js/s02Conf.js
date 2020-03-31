@@ -1,4 +1,4 @@
-var conf = {
+﻿var conf = {
 	cont: [	// 内容
 		{
 			nam: "标签头",
@@ -31,11 +31,11 @@ var conf = {
 			size: 40
 		},
 		{
-			nam: "生产人员ID",
+			nam: "生产人员",
 			size: 5
 		},
 		{
-			nam: "产品QC人员ID",
+			nam: "产品QC人员",
 			size: 5
 		},
 		{
@@ -43,7 +43,7 @@ var conf = {
 			size: 14
 		},
 		{
-			nam: "NFC标签写入人员ID",
+			nam: "NFC标签写入人员",
 			size: 5
 		},
 		{
@@ -72,7 +72,7 @@ var conf = {
 						}
 					}
 				},
-				CG:{
+				CY:{
 					nam: "磁钢",
 					sub: {
 						"2B":{
@@ -81,6 +81,10 @@ var conf = {
 						},
 						"1A":{
 							nam: "10A",
+							sub: {"1":1}
+						},
+						"1B":{
+							nam: "10B",
 							sub: {"1":1}
 						}
 					}
@@ -93,18 +97,43 @@ var conf = {
 		}
 	},
 	mem: {	// 人员
-		"00001": {
-			nam: "李泽荣",	// 姓名
-			cls: [0,1]	// 人员分类，对应 memCls
+		"04043": {
+			nam: "高金凤",	// 姓名
+			cls: [0]	// 人员分类，对应 memCls
 		},
-		"00002": {
-			nam: "童永成",	// 姓名
-			cls: [0,1]	// 人员分类，对应 memCls
+		"04042": {
+			nam: "杨建中",	// 姓名
+			cls: [0]	// 人员分类，对应 memCls
+		},
+		"04100": {
+			nam: "郑晓红",	// 姓名
+			cls: [1]	// 人员分类，对应 memCls
+		},
+		"04061": {
+			nam: "张玲玲",	// 姓名
+			cls: [1]	// 人员分类，对应 memCls
+		},
+		"04144": {
+			nam: "高清顺",	// 姓名
+			cls: [1]	// 人员分类，对应 memCls
 		}
 	},
 	memCls: [	// 人员分类
 		"品质", "生产"
 	],
+	bm: {	// 条码匹配
+		"^ST": {
+			m: ["F", "ST"]
+		},
+		"^CY": {
+			m: ["F", "CY"],
+			sub: {
+				"^.{4}10A" : {m: ["1A"]},
+				"^.{4}10B" : {m: ["1B"]},
+				"^.{4}20B" : {m: ["2B"]}
+			}
+		}
+	},
 
 	getCls: function (a, i) {
 		if (!i) {
@@ -173,7 +202,32 @@ var conf = {
 	checkCc: function (a) {	// 检查校验码
 		return a[12] === "99";
 	},
-	split: function (s) {
+	parseBm: function (s) {	// 条码解析
+		var i, c, o, k; r = [];
+		o = conf.bm;
+		k = 1;	// 循环标记
+		while (k) {
+			for (c in o) {
+				if (s.match(new RegExp(c))) {
+					for (i = 0; i < o[c].m.length; i ++) {
+						r.push(o[c].m[i]);
+					}
+					if (o[c].sub) {
+						o = o[c].sub;
+						k = 2;
+					}
+					break;
+				}
+			}
+			if (k === 2) {
+				k = 1;
+			} else {
+				k = 0;
+			}
+		}
+		return r.length ? r : null;
+	},
+	split: function (s) {	// 拆分标签源码
 		var i, n = 0, l, r = [];
 		for (i = 0; i < conf.cont.length; i ++) {
 			l = conf.cont[i].size;
