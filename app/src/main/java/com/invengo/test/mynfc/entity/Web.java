@@ -1,11 +1,7 @@
 package com.invengo.test.mynfc.entity;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -13,8 +9,6 @@ import com.invengo.test.mynfc.Ma;
 
 import tk.ziniulian.job.nfc.NfcUtils;
 import tk.ziniulian.util.dao.DbLocal;
-
-import static com.invengo.test.mynfc.Ma.SDRW_PRM;
 
 /**
  * 业务接口
@@ -125,16 +119,18 @@ public class Web {
 	}
 
 	/**
-	 * 检查内存卡读写权限是否打开
+	 * 登录
 	 */
 	@JavascriptInterface
-	public boolean checkSdPrm () {
-		if (ContextCompat.checkSelfPermission(ma, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-			return true;
-		} else {
-			ActivityCompat.requestPermissions(ma, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SDRW_PRM);
-			return false;
-		}
+	public boolean login (String user, String pw) {
+		return false;
+	}
+
+	/**
+	 * 登出
+	 */
+	@JavascriptInterface
+	public void logout () {
 	}
 
 	/**

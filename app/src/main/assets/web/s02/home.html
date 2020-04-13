@@ -9,12 +9,13 @@
 		<link href="../css/s02.css" rel="stylesheet" type="text/css" />
 
 		<script src="../js/tools.js"></script>
-		<script src="../js/home.js"></script>
+		<script src="../js/s02Conf.js"></script>
 
 		<style type="text/css">
 			.btn {
 				display: block;
 				width: 10rem;
+				margin: 1rem 0;
 			}
 		</style>
 	</head>
@@ -22,16 +23,137 @@
 	<body>
 		<div id="boso" class="boso midOut Lc_noadr">
 			<div class="midTop"></div><!--
-			--><div class="midSub mfs">
-				<a class="btn" href="./read.html">读</a>
-				<br/><br/><br/><br/>
-				<div id="btnDom" class="btn" onclick="dco.check();">写</div>
+			--><div id="oDom" class="midSub mfs">
+				<br/><div id="userDom" class="bfs"> *** </div><br/>
 			</div>
 		</div>
 		<div id="memoDom" class="memo"></div>
 	</body>
 
 	<script type="text/javascript">
-		document.body.onload = init;
+		var dco = {
+			uid: null,
+			user: null,
+
+			init: function () {
+				// 初始化配置信息
+				var s = rfdo.kvGet("conf");
+				if (s) {
+					conf.init(JSON.parse(s));
+				} else {
+					rfdo.kvSet("conf", JSON.stringify(conf));	// 数据库初始化
+					conf.init();
+				}
+
+				// 获取用户信息
+				dco.uid = rfdo.kvGet("uid");	// 用户ID
+				if (dco.uid) {
+					tools.memo.bind(memoDom);
+					dco.user = conf.getUser(dco.uid);
+					userDom.innerHTML = dco.user.nam;
+					dco.flush(dco.user.cls);
+				} else {
+					window.location.href = "./login.html";
+				}
+			},
+
+			// 登出
+			logout: function () {
+				rfdo.kvDel("uid");
+				window.location.href = "./login.html";
+			},
+
+			flush: function (pow) {
+				var i, d, p = [0,0,0,0,0,0];
+				for (i = 0; i < pow.length; i ++) {
+					switch (pow[i]) {
+						case 0:	// 品质
+							// p[0] = 1;
+							p[2] = 1;
+							// p[3] = 1;
+							break;
+						case 1:	// 生产
+							p[0] = 1;
+							p[1] = 1;
+							break;
+						case 2:	// 管理员
+							p[0] = 1;	// 读标签
+							p[1] = 1;	// 生产写
+							p[2] = 1;	// QC写
+							p[3] = 1;	// 锁标签
+							p[4] = 1;	// 解锁标签
+							p[5] = 1;	// 标签格式化
+							break;
+						case 3:	// 客服
+							p[0] = 1;
+							break;
+					}
+				}
+
+				for (i = 0; i < p.length; i ++) {
+					if (p[i]) {
+						switch (i) {
+							case 0:	// 读标签
+								d = document.createElement("a");
+								d.className = "btn";
+								d.innerHTML = "读";
+								d.href = "./read.html";
+								oDom.appendChild(d);
+								break;
+							case 1:	// 生产写
+								d = document.createElement("a");
+								d.className = "btn";
+								d.innerHTML = "写";
+								d.href = "./wrt.html";
+								oDom.appendChild(d);
+								break;
+							case 2:	// QC写
+								d = document.createElement("a");
+								d.className = "btn";
+								d.innerHTML = "QC";
+								d.href = "./qc.html";
+								oDom.appendChild(d);
+								break;
+							case 3:	// 锁标签
+								d = document.createElement("a");
+								d.className = "btn";
+								d.innerHTML = "锁";
+								// d.href = "./lock.html";
+								oDom.appendChild(d);
+								break;
+							case 4:	// 解锁标签
+								d = document.createElement("a");
+								d.className = "btn";
+								d.innerHTML = "解锁";
+								// d.href = "./unlock.html";
+								oDom.appendChild(d);
+								break;
+							case 5:	// 标签格式化
+								d = document.createElement("a");
+								d.className = "btn";
+								d.innerHTML = "格式化";
+								d.href = "./fom.html";
+								oDom.appendChild(d);
+								break;
+						}
+					}
+				}
+
+				d = document.createElement("div");
+				d.className = "btn";
+				d.innerHTML = "登出";
+				d.onclick = dco.logout;
+				oDom.appendChild(d);
+			},
+
+			onNew: function () {},
+
+			// 回退
+			back: function () {
+				tools.memo.exit("再按一次退出程序", "Exit");
+			}
+		};
+
+		document.body.onload = dco.init;
 	</script>
 </html>

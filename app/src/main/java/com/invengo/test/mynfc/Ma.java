@@ -29,7 +29,6 @@ public class Ma extends AppCompatActivity {
 	public static final int SCAN_PRM = 302; // 相机权限
 	public static final int SDRW_PRM = 303;	// 内存卡读写权限
 
-	private String wrtxt = "";	// 写入内容
 	private Handler uh = new UiHandler();
 	private WebView wv;
 	private Web w = new Web(this);
@@ -56,12 +55,18 @@ public class Ma extends AppCompatActivity {
 		mNfcAdapter = NfcUtils.NfcCheck(this);
 		if (mNfcAdapter == null) {
 			// 设备不支持 NFC 功能
-//			sendUrl(EmUrl.Home);
 			sendUrl(EmUrl.Err);
 		} else {
 			// NFC功能可用
 			NfcUtils.NfcInit(this);
-			sendUrl(EmUrl.Home);
+
+			// 检查存储权限
+			if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+				sendUrl(EmUrl.Home);
+			} else {
+				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SDRW_PRM);
+				sendUrl(EmUrl.Err2);
+			}
 		}
 	}
 
@@ -103,7 +108,7 @@ public class Ma extends AppCompatActivity {
 			break;
 			case SDRW_PRM:
 				if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					sendUrl(EmUrl.Wrt);
+					sendUrl(EmUrl.Home);
 				}
 				break;
 		}

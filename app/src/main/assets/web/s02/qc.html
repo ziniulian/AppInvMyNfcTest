@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>QC</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
+		<meta charset="utf-8" />
+
+		<link href="../css/base.css" rel="stylesheet" type="text/css" />
+		<link href="../css/s02.css" rel="stylesheet" type="text/css" />
+
+		<script src="../js/tools.js"></script>
+		<script src="../js/s02Conf.js"></script>
+
+		<style type="text/css">
+		</style>
+	</head>
+
+	<body>
+		<div id="boso" class="sfs Lc_noadr">
+			<br/><div id="btnDom" class="btn btnn">检 &nbsp; 验</div>
+			<br/><div id="memoDom" class="momo2">请放置标签</div>
+			<div id="txtDom", class="txt"></div><br/>
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		var dco = {
+			init: function () {
+				// conf.init();	// web测试用
+				conf.init(JSON.parse(rfdo.kvGet("conf")));
+
+				// 获取用户信息
+				// dco.uid = "00LZR";	// web测试用
+				dco.uid = rfdo.kvGet("uid");	// 用户ID
+				if (dco.uid) {
+					rfdo.rdy();
+					tools.memo.bind(memoDom);
+					dco.user = conf.getUser(dco.uid);
+				} else {
+					window.location.href = "./login.html";
+				}
+				// dco.onNew();	// 测试用
+			},
+
+			onNew: function () {
+				dco.read();
+			},
+
+			wrt: function () {
+				var i, cod, n, o;
+
+				// 重编 COD
+				dco.cod[8] = dco.uid;
+				dco.cod[9] = tools.getTimStr2();
+				dco.cod[10] = dco.uid;
+				cod = dco.cod[0];
+				n = conf.cont.length - 1;
+				for (i = 1; i < n; i ++) {
+					cod += dco.cod[i];
+				}
+				cod += conf.crtCc(cod);
+
+				o = JSON.parse(rfdo.wrt(cod));
+				// o = {ok:true,id:"test002"};	// 测试用
+				if (o.ok) {
+					btnDom.onclick = null;
+					btnDom.className = "btn btnn";
+					rfdo.tagLog(cod + ",,,,," + tools.trim(dco.cod[6]) + ",QC,," + dco.user.nam + "-" + dco.uid + "," + dco.cod[9] + "," + o.id);
+					rfdo.rdy();
+					txtDom.innerHTML = dco.parseCode(cod);
+					tools.memo.show("写入成功！");
+				} else {
+					tools.memo.show("写入失败" + (o.msg ? (" : " + o.msg) : "！"));
+				}
+			},
+
+			read: function () {
+				var o;
+				o = JSON.parse(rfdo.read());
+				// o = {ok:true,dat:"YWG1FST9P1                                 Test00104061000002020031611580604100                             99"};	// 测试用
+				if (o.ok) {
+					txtDom.innerHTML = dco.parseCode(o.dat);
+					tools.memo.hid();
+
+					// 对未检验是设备进行操作
+					if (dco.cod[8] === "00000") {
+						btnDom.className = "btn";
+						btnDom.onclick = dco.wrt;
+					}
+				} else {
+					txtDom.innerHTML = "";
+					tools.memo.show("读取失败" + (o.msg ? (" : " + o.msg) : "！"));
+				}
+			},
+
+			parseCode: function (c) {
+				var r = "", i, o, t;
+				k = conf.split(c);
+				dco.cod = k;
+				if (k && conf.checkCc(k)) {
+					try {
+						for (i = 0; i < k.length; i ++) {
+							o = conf.cont[i];
+							if (o.get) {
+								t = o.get(k, i);
+								if (t) {
+									r += "<br/>";
+									r += o.nam;
+									r += " : ";
+									r += t;
+									r += "<br/>";
+								}
+							}
+						}
+					} catch (e) {
+						r = "";
+					}
+				}
+				if (!r) {
+					tools.memo.show("解析失败 : " + c);
+				}
+				return r;
+			},
+
+			back: function () {
+				location.href = "./home.html";
+			}
+		};
+
+		document.body.onload = dco.init;
+	</script>
+</html>

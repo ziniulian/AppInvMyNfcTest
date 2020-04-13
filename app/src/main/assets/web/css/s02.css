@@ -42,3 +42,19 @@
 	color: #F00;
 	word-break: break-all;
 }
+
+.pmp {
+	color: #999;
+	font-style: italic;
+}
+
+.txt {
+	margin: 0 3%;
+	word-break: break-all;
+}
+
+.nqc {
+	color: #F00;
+	font-weight: bold;
+	font-size: 1.5rem;
+}

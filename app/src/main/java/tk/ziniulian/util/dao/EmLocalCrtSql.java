@@ -17,13 +17,13 @@ public enum EmLocalCrtSql {
 
 	Tag(	// 标签日志
 		"create table Tag(" +	// 表名
-		"cod text primary key not null, " +	// 写入标签的信息
+		"cod text, " +	// 写入标签的信息
 		"cls text," +	// 类别
 		"typ text," +	// 类型
 		"mod text," +	// 型号
 		"ver text," +	// 版本
 		"sn text," +	// 序列号
-		"mak text," +	// 生产者
+		"mak text," +	// 状态
 		"qc text," +	// QC
 		"wrt text," +	// 写入人
 		"tim text," +	// 写入时间

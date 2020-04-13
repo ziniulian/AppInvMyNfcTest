@@ -12,24 +12,20 @@
 		<script src="../js/s02Conf.js"></script>
 
 		<style type="text/css">
-			.txt {
-				margin: 0 3%;
-				word-break: break-all;
-			}
 		</style>
 	</head>
 
 	<body>
 		<div id="boso" class="sfs Lc_noadr">
 			<div id="txtDom", class="txt"></div><br/>
-			<div id="memoDom" class="memo"></div>
+			<div id="memoDom" class="memo">请放置标签</div>
 		</div>
 	</body>
 
 	<script type="text/javascript">
 		function init () {
+			conf.init(JSON.parse(rfdo.kvGet("conf")));
 			tools.memo.bind(memoDom);
-			conf.init();
 			rfdo.rdy();
 		}
 
@@ -40,9 +36,10 @@
 
 			read: function () {
 				var o = JSON.parse(rfdo.read());
-				// o = {ok:true,dat:"YWG1FST9P1                                 Test00100001000012020031611580600001                             99"};
+				// var o = {ok:true,dat:"YWG1FST9P1                                 Test00104061000002020031611580604100                             99"};
 				if (o.ok) {
 					txtDom.innerHTML = dco.parseCode(o.dat);
+					tools.memo.hid();
 				} else {
 					txtDom.innerHTML = "";
 					tools.memo.show("读取失败" + (o.msg ? (" : " + o.msg) : "！"));

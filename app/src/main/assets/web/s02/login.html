@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Login</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
+		<meta charset="utf-8" />
+
+		<link href="../css/base.css" rel="stylesheet" type="text/css" />
+		<link href="../css/s02.css" rel="stylesheet" type="text/css" />
+
+		<script src="../js/tools.js"></script>
+		<script src="../js/s02Conf.js"></script>
+
+		<style type="text/css">
+			.btn {
+				width: 12rem;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="boso" class="boso midOut bfs Lc_noadr">
+			<br/><br/>兰州远望 NFC 读写器<br/>
+			<br/><input id="unamDom" type="text" placeholder="请输入用户名" onfocus="this.select();"/>
+			<br/><input id="pwdDom" type="password" placeholder="请输入密码" onfocus="this.select();"/>
+			<br/><br/><div class="btn sfs" onclick="dco.login();">登 录</div>
+		</div>
+		<div id="memoDom" class="memo"></div>
+	</body>
+
+	<script type="text/javascript">
+		var dco = {
+			init: function () {
+				conf.init(JSON.parse(rfdo.kvGet("conf")));
+				tools.memo.bind(memoDom);
+			},
+
+			// 登录
+			login: function () {
+				var u = unamDom.value;
+				var p = pwdDom.value;
+		        if (u) {
+			        if (p) {
+						u = tools.strFormt(u, 5, "0");
+						if (conf.mem[u]) {
+							if (conf.mem[u].pw === p) {
+								rfdo.kvSet("uid", u);
+								window.location.href = "./home.html";
+							} else {
+								tools.memo.show("密码错误！");
+							}
+						} else {
+							tools.memo.show("用户名不存在！");
+						}
+						pwdDom.value = "";
+					} else {
+						tools.memo.show("密码不能为空！");
+					}
+				} else {
+					tools.memo.show("用户名不能为空！");
+				}
+			},
+
+			// 回退
+			back: function () {
+				tools.memo.exit("再按一次退出程序", "Exit");
+			}
+		};
+
+		document.body.onload = dco.init;
+	</script>
+</html>

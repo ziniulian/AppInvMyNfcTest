@@ -39,11 +39,11 @@
 			size: 5
 		},
 		{
-			nam: "NFC标签写入时间",
+			nam: "最后写入时间",
 			size: 14
 		},
 		{
-			nam: "NFC标签写入人员",
+			nam: "最后写入人",
 			size: 5
 		},
 		{
@@ -97,29 +97,44 @@
 		}
 	},
 	mem: {	// 人员
+		"00LZR": {	// 编号
+			nam: "李泽荣",	// 姓名
+			pw: "adm", // 登录密码
+			cls: [2]	// 人员分类，对应 memCls
+		},
 		"04043": {
-			nam: "高金凤",	// 姓名
-			cls: [0]	// 人员分类，对应 memCls
+			nam: "高金凤",
+			pw: "340",
+			cls: [0]
 		},
 		"04042": {
-			nam: "杨建中",	// 姓名
-			cls: [0]	// 人员分类，对应 memCls
+			nam: "杨建中",
+			pw: "240",
+			cls: [0]
 		},
 		"04100": {
-			nam: "郑晓红",	// 姓名
-			cls: [1]	// 人员分类，对应 memCls
+			nam: "郑晓红",
+			pw: "001",
+			cls: [1]
 		},
 		"04061": {
-			nam: "张玲玲",	// 姓名
-			cls: [1]	// 人员分类，对应 memCls
+			nam: "张玲玲",
+			pw: "160",
+			cls: [1]
 		},
 		"04144": {
-			nam: "高清顺",	// 姓名
-			cls: [1]	// 人员分类，对应 memCls
+			nam: "高清顺",
+			pw: "441",
+			cls: [1]
+		},
+		"000KF": {	// 编号
+			nam: "客服人员",	// 姓名
+			pw: "123", // 登录密码
+			cls: [3]	// 人员分类，对应 memCls
 		}
 	},
 	memCls: [	// 人员分类
-		"品质", "生产"
+		"品质", "生产", "管理员", "客服"
 	],
 	bm: {	// 条码匹配
 		"^ST": {
@@ -182,7 +197,16 @@
 		return tools.trim(a[i]);
 	},
 	getMem: function (a, i) {
-		return conf.mem[a[i]].nam;
+		var o = conf.mem[a[i]];
+		if (o) {
+			return o.nam;
+		} else {
+			if (i === 8 && a[i] === "00000") {
+				return "<span class=\"nqc\">未检验</span>";
+			} else {
+				return "---";
+			}
+		}
 	},
 	getTim: function (a, i) {
 		if (!i) {
@@ -237,7 +261,17 @@
 		return (n > s.length) ? null : r;
 	},
 
-	init: function () {
+	getUser: function (uid) {	// 获取用户信息
+		return conf.mem[uid];
+	},
+
+	init: function (o) {
+		if (o) {
+			for (var s in o) {
+				conf[s] = o[s];
+			}
+		}
+
 		conf.cont[2].get = conf.getCls;
 		conf.cont[3].get = conf.getTyp;
 		conf.cont[4].get = conf.getMod;

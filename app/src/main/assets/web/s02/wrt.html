@@ -22,9 +22,7 @@
 			<div>&nbsp; 类型：<select id="typDom" class="sfs sct" onchange="dco.chgCls(2);"></select></div><br/>
 			<div>&nbsp; 型号：<select id="modDom" class="sfs sct" onchange="dco.chgCls(3);"></select></div><br/>
 			<div>&nbsp; 版本：<select id="verDom" class="sfs sct"></select></div><br/>
-			<div>&nbsp; QC：<select id="qcDom" class="sfs sct"></select></div><br/>
-			<div>&nbsp; 生产者：<select id="makDom" class="sfs sct"></select></div><br/>
-			<div>&nbsp; 写入人：<select id="wrtDom" class="sfs sct"></select></div><br/>
+			<div>&nbsp; 写入人：<span id="userDom"></span></div><br/>
 			<div class="barBtn"><a href="javascript: rfdo.scan();">扫码</a></div>
 			<textarea id="txarDom" class="sfs txar" placeholder="请输入序列号"></textarea><br/>
 			<div id="btnDom" class="btn btnn">写 &nbsp; 入</div>
@@ -33,14 +31,26 @@
 	</body>
 
 	<script type="text/javascript">
-		function init () {
-			tools.memo.bind(memoDom);
-			dco.initDom();
-			rfdo.rdy();
-			// dco.onNew();	// 测试用
-		}
-
 		var dco = {
+			init: function () {
+				// conf.init();	// web测试用
+				conf.init(JSON.parse(rfdo.kvGet("conf")));
+
+				// 获取用户信息
+				// dco.uid = "00LZR";	// web测试用
+				dco.uid = rfdo.kvGet("uid");	// 用户ID
+				if (dco.uid) {
+					rfdo.rdy();
+					tools.memo.bind(memoDom);
+					dco.user = conf.getUser(dco.uid);
+					userDom.innerHTML = dco.user.nam;
+					dco.initDom();
+				} else {
+					window.location.href = "./login.html";
+				}
+				// dco.onNew();	// 测试用
+			},
+
 			onNew: function () {
 				btnDom.className = "btn";
 				btnDom.onclick = dco.wrt;
@@ -94,19 +104,6 @@
 				for (s in conf.typ) {
 					clsDom.appendChild(dco.crtOp(conf.typ, s));
 				}
-				for (s in conf.mem) {
-					wrtDom.appendChild(dco.crtOp(conf.mem, s));
-					for (i = 0; i < conf.mem[s].cls.length; i ++) {
-						switch (conf.mem[s].cls[i]) {
-							case 0:
-								qcDom.appendChild(dco.crtOp(conf.mem, s));
-								break;
-							case 1:
-								makDom.appendChild(dco.crtOp(conf.mem, s));
-								break;
-						}
-					}
-				}
 				dco.chgCls(1, "F");
 			},
 
@@ -145,48 +142,27 @@
 									if (s.match(/^[\x00-\xff]+$/g)) {
 										if (s.length <= 40) {
 											pro += s;
-											pro += ",";
 											r += tools.strFormt(s, 40, " ");
-											s = makDom.value;
-											if (s) {
-												pro += makDom.options[makDom.selectedIndex].text;
-												pro += "-";
-												pro += s;
-												pro += ",";
-												r += s;
-												s = qcDom.value;
-												if (s) {
-													pro += qcDom.options[qcDom.selectedIndex].text;
-													pro += "-";
-													pro += s;
-													pro += ",";
-													r += s;
-													s = wrtDom.value;
-													if (s) {
-														pro += wrtDom.options[wrtDom.selectedIndex].text;
-														pro += "-";
-														pro += s;
-														pro += ",";
-														var t = tools.getTimStr2();
-														pro += t;
-														pro += ",";
-														r += t;
-														r += s;
-														r += "                             ";
-														r += conf.crtCc(r);
-														pro = r + pro;
-													} else {
-														r = "";
-														tools.memo.show("写入人不能为空");
-													}
-												} else {
-													r = "";
-													tools.memo.show("QC不能为空");
-												}
-											} else {
-												r = "";
-												tools.memo.show("生产者不能为空");
-											}
+
+											r += dco.uid;	// 生产者
+											r += "00000";	// QC
+											pro += ",生产,,";	// 操作状态
+
+											// 写入人
+											pro += dco.user.nam;
+											pro += "-";
+											pro += dco.uid;
+											pro += ",";
+
+											// 写入时间
+											var t = tools.getTimStr2();
+											pro += t;
+											pro += ",";
+											r += t;
+											r += dco.uid;	// 写入人
+											r += "                             ";
+											r += conf.crtCc(r);
+											pro = r + pro;
 										} else {
 											r = "";
 											tools.memo.show("序列号长度不能大于40个字");
@@ -224,7 +200,11 @@
 					var o = JSON.parse(rfdo.wrt(a[0]));
 					// var o = {ok:true,id:"test001"};	// 测试用
 					if (o.ok) {
+						btnDom.onclick = null;
+						btnDom.className = "btn btnn";
 						rfdo.tagLog(a[1] + o.id);
+						rfdo.rdy();
+						txarDom.value = "";
 						tools.memo.show("写入成功！");
 					} else {
 						tools.memo.show("写入失败" + (o.msg ? (" : " + o.msg) : "！"));
@@ -249,6 +229,6 @@
 			}
 		};
 
-		document.body.onload = init;
+		document.body.onload = dco.init;
 	</script>
 </html>
