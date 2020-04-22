@@ -64,13 +64,12 @@
 			},
 
 			flush: function (pow) {
-				var i, d, p = [0,0,0,0,0,0];
+				var i, d, p = [0,0,0,0,0];
 				for (i = 0; i < pow.length; i ++) {
 					switch (pow[i]) {
 						case 0:	// 品质
 							// p[0] = 1;
 							p[2] = 1;
-							// p[3] = 1;
 							break;
 						case 1:	// 生产
 							p[0] = 1;
@@ -81,8 +80,7 @@
 							p[1] = 1;	// 生产写
 							p[2] = 1;	// QC写
 							p[3] = 1;	// 锁标签
-							p[4] = 1;	// 解锁标签
-							p[5] = 1;	// 标签格式化
+							p[4] = 1;	// 标签格式化
 							break;
 						case 3:	// 客服
 							p[0] = 1;
@@ -118,17 +116,10 @@
 								d = document.createElement("a");
 								d.className = "btn";
 								d.innerHTML = "锁";
-								// d.href = "./lock.html";
+								d.href = "./lock.html";
 								oDom.appendChild(d);
 								break;
-							case 4:	// 解锁标签
-								d = document.createElement("a");
-								d.className = "btn";
-								d.innerHTML = "解锁";
-								// d.href = "./unlock.html";
-								oDom.appendChild(d);
-								break;
-							case 5:	// 标签格式化
+							case 4:	// 标签格式化
 								d = document.createElement("a");
 								d.className = "btn";
 								d.innerHTML = "格式化";

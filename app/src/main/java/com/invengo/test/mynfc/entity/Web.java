@@ -50,7 +50,6 @@ public class Web {
 						r = NfcUtils.read(itn);
 						break;
 					case 2:
-						// 数据库记录
 						r = NfcUtils.wrt(txt, itn);
 						break;
 					case 3:
@@ -58,6 +57,9 @@ public class Web {
 						break;
 					case 4:
 						r = NfcUtils.formatNdefToTag(itn);
+						break;
+					case 5:
+						r = NfcUtils.lockNdefToTag(itn);
 						break;
 					default:
 						r = "{\"ok\":false}";
@@ -100,6 +102,14 @@ public class Web {
 	@JavascriptInterface
 	public String tagFormat () {
 		return doTag(4, "");
+	}
+
+	/**
+	 * 标签格式化
+	 */
+	@JavascriptInterface
+	public String tagLock () {
+		return doTag(5, "");
 	}
 
 	/**

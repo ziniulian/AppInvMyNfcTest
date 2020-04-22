@@ -63,12 +63,17 @@
 				o = JSON.parse(rfdo.wrt(cod));
 				// o = {ok:true,id:"test002"};	// 测试用
 				if (o.ok) {
-					btnDom.onclick = null;
-					btnDom.className = "btn btnn";
-					rfdo.tagLog(cod + ",,,,," + tools.trim(dco.cod[6]) + ",QC,," + dco.user.nam + "-" + dco.uid + "," + dco.cod[9] + "," + o.id);
-					rfdo.rdy();
-					txtDom.innerHTML = dco.parseCode(cod);
-					tools.memo.show("写入成功！");
+					o = JSON.parse(rfdo.tagLock());	// 标签锁定
+					if (o.ok) {
+						btnDom.onclick = null;
+						btnDom.className = "btn btnn";
+						rfdo.tagLog(cod + ",,,,," + tools.trim(dco.cod[6]) + ",QC,," + dco.user.nam + "-" + dco.uid + "," + dco.cod[9] + "," + o.id);
+						rfdo.rdy();
+						txtDom.innerHTML = dco.parseCode(cod);
+						tools.memo.show("写入成功！");
+					} else {
+						tools.memo.show("锁定失败" + (o.msg ? (" : " + o.msg) : "！");
+					}
 				} else {
 					tools.memo.show("写入失败" + (o.msg ? (" : " + o.msg) : "！"));
 				}

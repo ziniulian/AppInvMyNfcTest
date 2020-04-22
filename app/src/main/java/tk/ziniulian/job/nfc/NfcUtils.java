@@ -132,17 +132,30 @@ public class NfcUtils {
 		String r = "{\"ok\":false}";
 		Tag tag = getTag(intent);
 
+		// 创建要写入的NdefMessage对象
+		NdefRecord ndefRecord = createTextRecord(data);
+		NdefRecord[] records = {ndefRecord};
+		NdefMessage ndefMessage = new NdefMessage(records);
+
 		Ndef ndef = Ndef.get(tag);
 		if (ndef == null) {
-			throw new Exception("非NDEF数据格式！");
+			NdefFormatable format = NdefFormatable.get(tag);
+			if (format != null) {
+				// NDEF 格式化
+				try {
+					format.connect();
+					format.format(ndefMessage);
+					r = "{\"ok\":true,\"id\":\"" + getId(tag) + "\"}";
+					format.close();
+				} catch (Exception e) {
+					throw new Exception("非NDEF数据格式！");
+				}
+			} else {
+				throw new Exception("标签不支持NDEF格式！");
+			}
 		} else {
 			ndef.connect();
 			if (ndef.isWritable()) {
-				// 创建要写入的NdefMessage对象
-				NdefRecord ndefRecord = createTextRecord(data);
-				NdefRecord[] records = {ndefRecord};
-				NdefMessage ndefMessage = new NdefMessage(records);
-
 				if (ndef.getMaxSize() < ndefMessage.toByteArray().length) {
 					ndef.close();
 					throw new Exception("NFC标签的空间不足！");
@@ -204,7 +217,35 @@ public class NfcUtils {
 				throw new Exception("NDEF格式化失败！");
 			}
 		} else {
-			throw new Exception("NFC标签不支持NDEF格式！");
+			throw new Exception("标签不支持NDEF格式！");
+		}
+		return r;
+	}
+
+	/**
+	 * 锁定 NFC 标签
+	 */
+	public static String lockNdefToTag(Intent intent) throws Exception {
+		String r = "{\"ok\":false}";
+		Tag tag = getTag(intent);
+
+		Ndef ndef = Ndef.get(tag);
+		if (ndef == null) {
+			throw new Exception("非NDEF数据格式！");
+		} else {
+			ndef.connect();
+			if (ndef.canMakeReadOnly()) {
+				if (ndef.makeReadOnly()) {
+					ndef.close();
+					r = "{\"ok\":true,\"id\":\"" + getId(tag) + "\"}";
+				} else {
+					ndef.close();
+					throw new Exception("失败！失败！");
+				}
+			} else {
+				ndef.close();
+				throw new Exception("该标签无法锁定！");
+			}
 		}
 		return r;
 	}
