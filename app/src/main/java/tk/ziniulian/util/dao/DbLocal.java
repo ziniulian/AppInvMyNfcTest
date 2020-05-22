@@ -111,4 +111,60 @@ public class DbLocal extends SQLiteOpenHelper {
 		exe(EmLocalSql.tagAdd, s.split(","));
 	}
 
+	// 获取所有标签记录
+	public String tagGet () {
+		StringBuilder r = new StringBuilder("[");
+		SQLiteDatabase db = this.getReadableDatabase();
+		Cursor c = db.rawQuery(EmLocalSql.tagAll.toString(), null);
+
+		while (c.moveToNext()) {
+			r.append("{\"cod\":\"");
+			r.append(c.getString(0));
+			r.append("\",\"cls\":\"");
+			r.append(c.getString(1));
+			r.append("\",\"typ\":\"");
+			r.append(c.getString(2));
+			r.append("\",\"mod\":\"");
+			r.append(c.getString(3));
+			r.append("\",\"ver\":\"");
+			r.append(c.getString(4));
+			r.append("\",\"sn\":\"");
+			r.append(c.getString(5));
+			r.append("\",\"stu\":\"");
+			r.append(c.getString(6));
+			r.append("\",\"nam\":\"");
+
+			// 兼容旧版数据格式
+			String s = c.getString(7);
+			if (s.length() == 0) {
+				String[] a = c.getString(8).split("-");
+				if (a.length == 2) {
+					r.append(a[0]);
+					r.append("\",\"uid\":\"");
+					r.append(a[1]);
+				}
+			} else {
+				r.append(c.getString(7));
+				r.append("\",\"uid\":\"");
+				r.append(c.getString(8));
+			}
+
+			r.append("\",\"tim\":\"");
+			r.append(c.getString(9));
+			r.append("\",\"tid\":\"");
+			r.append(c.getString(10));
+			r.append("\"},");
+		}
+		r.replace(r.length() - 1, r.length(), "");
+		r.append("]");
+
+		c.close();
+		db.close();
+		return r.toString();
+	}
+
+	// 清空所有标签记录
+	public void tagDel () {
+		exe(EmLocalSql.tagClear);
+	}
 }

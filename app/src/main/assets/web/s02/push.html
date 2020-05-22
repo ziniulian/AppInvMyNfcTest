@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Push</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
+		<meta charset="utf-8" />
+
+		<link href="../css/base.css" rel="stylesheet" type="text/css" />
+
+		<script src="../js/tools.js"></script>
+		<script src="../js/s02Conf.js"></script>
+	</head>
+
+	<body>
+		<div id="boso" class="boso midOut Lc_noadr">
+			<div class="midTop"></div><!--
+			--><div id="txtDom" class="midSub mfs">正在连接服务器 ...</div>
+		</div>
+		<div id="memoDom" class="memo"></div>
+	</body>
+
+	<script type="text/javascript">
+		var dco = {
+			uid: null,
+			user: null,
+			ip: "192.169.0.150:888",
+			stu: 0,
+
+			init: function () {
+				// 初始化配置信息
+				var s = rfdo.kvGet("conf");
+				if (s) {
+					conf.init(JSON.parse(s));
+				} else {
+					conf.init();
+				}
+
+				// 获取用户信息
+				dco.uid = rfdo.kvGet("uid");	// 用户ID
+				if (dco.uid) {
+					tools.memo.bind(memoDom);
+					dco.user = conf.getUser(dco.uid);
+					if (conf.ip) {
+						dco.ip = conf.ip;
+					}
+					rfdo.ajx("http://" + dco.ip + "/NFC/tim/", true, "");
+				} else {
+					window.location.href = "./login.html";
+				}
+			},
+
+			// 回调
+			hdAjaxCb: function (o) {
+				if (o) {
+					switch (dco.stu) {
+						case 0:	// 测试服务器连接
+							if (o.ok) {
+								dco.stu = 1;
+								txtDom.innerHTML = "正在更新配置信息 ...";
+								rfdo.ajx("http://" + dco.ip + "/NFC/conf/", true, "");
+							} else {
+								dco.stu = 0;
+								txtDom.innerHTML = "服务器连接失败！";
+							}
+							break;
+						case 1:	// 从服务器更新配置文件信息
+							if (o.ok) {
+								if (o.dat.ver > conf.ver) {
+									conf.init(o.dat);
+									rfdo.kvSet("conf", JSON.stringify(o.dat));
+								}
+								dco.stu = 2;
+								txtDom.innerHTML = "正在上传数据 ...";
+								rfdo.push("http://" + dco.ip + "/NFC/push/");
+							} else {
+								dco.stu = 0;
+								txtDom.innerHTML = "服务器连接失败！";
+							}
+							break;
+						case 2:	// 数据上传
+							if (o.ok) {
+								if (o.dat) {
+									rfdo.tagDel();
+								} else {
+									tools.memo.show(o.msg);
+								}
+								txtDom.innerHTML = "数据上传完毕！";
+							} else {
+								txtDom.innerHTML = "服务器连接失败！";
+							}
+							dco.stu = 0;
+							break;
+					}
+				} else {
+					dco.stu = 0;
+					txtDom.innerHTML = "网络连接失败！";
+				}
+			},
+
+			// 回退
+			back: function () {
+				if (dco.stu === 0) {
+					location.href = "./home.html";
+				} else {
+					tools.memo.show("正在进行数据同步，请稍后再退出");
+				}
+			}
+		};
+
+		document.body.onload = dco.init;
+	</script>
+</html>

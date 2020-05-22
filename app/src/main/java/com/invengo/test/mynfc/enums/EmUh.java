@@ -7,5 +7,7 @@ package com.invengo.test.mynfc.enums;
 
 public enum EmUh {
 	Url,
+	Ajax,
+	AjaxErr,
 	Err
 }

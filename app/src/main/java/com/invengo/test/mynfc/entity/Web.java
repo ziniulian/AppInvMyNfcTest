@@ -6,9 +6,11 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 import com.invengo.test.mynfc.Ma;
+import com.invengo.test.mynfc.enums.EmUrl;
 
 import tk.ziniulian.job.nfc.NfcUtils;
 import tk.ziniulian.util.dao.DbLocal;
+import tk.ziniulian.util.dao.HttpAjax;
 
 /**
  * 业务接口
@@ -18,12 +20,14 @@ import tk.ziniulian.util.dao.DbLocal;
 public class Web {
 	private Ma ma;
 	private Handler h;
+	private HttpAjax ajx;
 	private Intent itn = null;
 	private DbLocal db;
 
 	public Web (Ma m) {
 		this.ma = m;
 		this.h = m.getHd();
+		this.ajx = new HttpAjax(this.h);
 		this.db = new DbLocal(m, 1);
 	}
 
@@ -164,6 +168,39 @@ public class Web {
 	@JavascriptInterface
 	public void kvDel (String k) {
 		this.db.kvDel(k);
+	}
+
+	/**
+	 * 网络连接
+	 */
+	@JavascriptInterface
+	public void ajx (String url, boolean isGet, String dat) {
+		if (isGet) {
+			this.ajx.get(url);
+		} else {
+			this.ajx.post(url, dat);
+		}
+	}
+
+	/**
+	 * 上传数据
+	 */
+	@JavascriptInterface
+	public void push (String ip) {
+		String d = this.db.tagGet();
+		if (d.length() > 3) {
+			this.ajx(ip, false, "o=" + d);
+		} else {
+			ma.sendUrl(EmUrl.AjaxCb, "{\"ok\":true,\"dat\":null,\"msg\":\"无数据\"}");
+		}
+	}
+
+	/**
+	 * 清空数据
+	 */
+	@JavascriptInterface
+	public void tagDel () {
+		this.db.tagDel();
 	}
 
 }

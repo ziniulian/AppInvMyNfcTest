@@ -20,7 +20,13 @@ public enum EmLocalSql {
 	KvDel("delete from <1> where k = '<0>'"),
 
 	// 添加标签记录
-	tagAdd("insert into Tag values('<0>','<1>','<2>','<3>','<4>','<5>','<6>','<7>','<8>','<9>','<10>')");
+	tagAdd("insert into Tag values('<0>','<1>','<2>','<3>','<4>','<5>','<6>','<7>','<8>','<9>','<10>')"),
+
+	// 获取所有标签记录
+	tagAll("select * from Tag"),
+
+	// 清空所有标签记录
+	tagClear("delete from Tag");
 
 	private final String sql;
 	EmLocalSql(String s) {

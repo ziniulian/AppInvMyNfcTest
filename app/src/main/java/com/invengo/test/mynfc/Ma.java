@@ -53,10 +53,10 @@ public class Ma extends AppCompatActivity {
 		});
 
 		mNfcAdapter = NfcUtils.NfcCheck(this);
-		if (mNfcAdapter == null) {
-			// 设备不支持 NFC 功能
-			sendUrl(EmUrl.Err);
-		} else {
+//		if (mNfcAdapter == null) {
+//			// 设备不支持 NFC 功能
+//			sendUrl(EmUrl.Err);
+//		} else {
 			// NFC功能可用
 			NfcUtils.NfcInit(this);
 
@@ -67,7 +67,7 @@ public class Ma extends AppCompatActivity {
 				ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, SDRW_PRM);
 				sendUrl(EmUrl.Err2);
 			}
-		}
+//		}
 	}
 
 	@Override
@@ -203,6 +203,12 @@ public class Ma extends AppCompatActivity {
 			switch (e) {
 				case Url:
 					wv.loadUrl((String)msg.obj);
+					break;
+				case Ajax:
+					wv.loadUrl(Str.meg(EmUrl.AjaxCb.toString(), (String)msg.obj));
+					break;
+				case AjaxErr:
+					wv.loadUrl(Str.meg(EmUrl.AjaxCb.toString(), "false"));
 					break;
 				case Err:
 					wv.loadUrl(Str.meg(EmUrl.Memo.toString(), (String)msg.obj));
