@@ -12,7 +12,7 @@
 			</div>
 			<form id="qryFmDom" action="{{=it.tmpo.url.base}}/" method="post" target="_self">
 				{{#def.qrypro}}
-				<input id="markDom" type="hidden" name="mark" value='{"id":1, "typ":1, "tim":1}'/>
+				<input id="markDom" type="hidden" name="mark" value='{"sn":1, "tim":1, "stu":1, "nam":1}'/>
 				<input id="contDom" type="hidden" name="cont" value="{}"/>
 			</form>
 			<div>

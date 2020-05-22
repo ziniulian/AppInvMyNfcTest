@@ -133,22 +133,9 @@ public class DbLocal extends SQLiteOpenHelper {
 			r.append("\",\"stu\":\"");
 			r.append(c.getString(6));
 			r.append("\",\"nam\":\"");
-
-			// 兼容旧版数据格式
-			String s = c.getString(7);
-			if (s.length() == 0) {
-				String[] a = c.getString(8).split("-");
-				if (a.length == 2) {
-					r.append(a[0]);
-					r.append("\",\"uid\":\"");
-					r.append(a[1]);
-				}
-			} else {
-				r.append(c.getString(7));
-				r.append("\",\"uid\":\"");
-				r.append(c.getString(8));
-			}
-
+			r.append(c.getString(7));
+			r.append("\",\"uid\":\"");
+			r.append(c.getString(8));
 			r.append("\",\"tim\":\"");
 			r.append(c.getString(9));
 			r.append("\",\"tid\":\"");
