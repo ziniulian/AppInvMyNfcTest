@@ -11,6 +11,8 @@ var srv = new LZR.Node.Srv ({
 	port: 888
 });
 
+srv.ro.setStaticDir("/myLib/", LZR.curPath);
+
 srv.use("/NFC/", require("./Nfc"));
 
 srv.ro.setStaticDir("/", "./web");
