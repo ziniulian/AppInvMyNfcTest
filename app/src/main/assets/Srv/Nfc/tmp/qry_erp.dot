@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>数据查询</title>
+		<title>ERP查询</title>
 		{{#def.meta}}
 
 		<script type="text/javascript" src="/myLib/LZR.js"></script>
@@ -31,22 +31,13 @@
 			<div class="logo">
 				<input id="dateDom" type="date" onchange="dco.secTim(this.value);"/>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<select id="stuDom" onchange="dco.secStu(this.value);">
-					<option value="">全部</option>
-					<option value="生产">生产</option>
-					<option value="QC">QC</option>
-					<option value="出货">出货</option>
-					<option value="领料">领料</option>
-					<option value="归还">归还</option>
-				</select>
-				&nbsp;&nbsp;&nbsp;&nbsp;
-				<input id="snDom" type="text" placeholder="可输入序列号搜索" onchange="dco.secSn(this.value);" onfocus="this.select();"/>
+				<input id="enDom" type="text" placeholder="ERP单号搜索" onchange="dco.secEn(this.value);" onfocus="this.select();"/>
 				&nbsp;&nbsp;&nbsp;&nbsp;
 				<a href="javascript: dco.secDel();">清空</a>
 			</div>
 			<form id="qryFmDom" action="{{=it.tmpo.url.base}}/" method="post" target="_self">
 				{{#def.qrypro}}
-				<input id="markDom" type="hidden" name="mark" value='{"sn":1, "tim":1, "stu":1, "nam":1, "en":1}'/>
+				<input id="markDom" type="hidden" name="mark" value='{"erp":1, "tim":1, "total":1}'/>
 				<input id="contDom" type="hidden" name="cont" value="{}"/>
 			</form>
 			<br />
@@ -70,24 +61,18 @@
 					<table>
 						<tbody>
 							<tr>
-								<th class="c" width="42%">序列号</th>
+								<th class="c" width="42%">ERP单号</th>
 								<th class="c">时间</th>
-								<th class="c">操作</th>
-								<th class="c">操作人</th>
+								<th class="c">发货数量</th>
 							</tr>
 						</tbody>
 						<tbody>
 							{{~it.comDbSrvReturn:o:i}}
 								{{? i < it.tmpo.qry.size}}
 									<tr>
-										<td title="{{=o._id || ""}}"><a href='javascript: dco.secSn("{{=o.sn}}");'>{{=o.sn || ""}}</a></td>
+										<td title="{{=o._id || ""}}"><a target="_blank" href='{{=it.tmpo.url.rout}}qry_erpInfo/?en={{=o.erp}}'>{{=o.erp || ""}}</a></td>
 										<td>{{=(o.tim ? (it.tmpo.tls.utTim.formatStr(o.tim, "S1")) : "")}}</td>
-										<td>
-											{{=(o.en ? "<a target='_blank' href='" + it.tmpo.url.rout + "qry_erpInfo/?en=" + o.en + "'>" : "")}}
-											{{=o.stu || ""}}
-											{{=(o.en ? "</a>" : "")}}
-										</td>
-										<td>{{=o.nam || ""}}</td>
+										<td>{{=o.total || ""}}</td>
 									</tr>
 								{{?}}
 							{{~}}
@@ -138,43 +123,30 @@
 			dco.first();
         };
 
-        dco.secSn = function (s) {
-			if (s) {
-				dco.sec.sn = {
-					"$regex": s
+        dco.secEn = function (en) {
+			if (en) {
+				dco.sec.erp = {
+					"$regex": en
 				};
 			} else {
-				delete(dco.sec.sn);
-			}
-			condDom.value = dco.utJson.toJson(dco.sec);
-			dco.first();
-        };
-
-        dco.secStu = function (s) {
-			if (s) {
-				dco.sec.stu = s;
-			} else {
-				delete(dco.sec.stu);
+				delete(dco.sec.erp);
 			}
 			condDom.value = dco.utJson.toJson(dco.sec);
 			dco.first();
         };
 
         dco.secDel = function () {
-			condDom.value = "{\"sn\":{\"$exists\":true}}";
+			condDom.value = "{\"erp\":{\"$exists\":true}}";
 			dco.first();
         };
 
 		dco.secInit = function () {
 			dco.sec = dco.utJson.toObj(condDom.value);
-			if (dco.sec.stu) {
-				stuDom.value = dco.sec.stu;
-			}
 			if (dco.sec.tim) {
 				dateDom.value = dco.utTim.formatStr(dco.sec.tim.$gte, "S2");
 			}
-			if (dco.sec.sn) {
-				snDom.value = dco.sec.sn.$regex || "";
+			if (dco.sec.erp) {
+				enDom.value = dco.sec.erp.$regex || "";
 			}
 		};
 

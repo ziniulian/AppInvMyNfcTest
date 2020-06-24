@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>出货</title>
+		<title>领料</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
 		<meta charset="utf-8" />
 
@@ -57,13 +57,9 @@
 	<body>
 		<div id="boso" class="boso">
 			<div class="logo">
-				<input id="enDom" type="text" placeholder="请输入ERP单号" onfocus="this.select();"/>
+				<input id="uidDom" type="text" placeholder="领用人工号" onfocus="this.select();"/>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<!-- <select id="facDom">
-					<option>A厂商</option>
-					<option>B厂商</option>
-					<option>C厂商</option>
-				</select> -->
+				<input id="namDom" type="text" placeholder="领用人姓名" onfocus="this.select();"/>
 				&nbsp;&nbsp;&nbsp;&nbsp;
 				<a href="javascript: dco.push();">提交</a>
 				<span id="numDom" class="num">0</span>
@@ -190,36 +186,40 @@
 			},
 
 			push: function () {
-				var en = enDom.value;
+				var u = uidDom.value;
+				var n = namDom.value;
 				if (dco.total) {
-					if (en) {
-						var s, r, o = [];
-						for (s in dco.dat) {
-							t  = dco.dat[s];
-							o.push ({
-								sn: t.sn,
-								tim: t.tim,
-								stu: "出货",
-								nam: "{{=it.tmpo.usr.nam}}",
-								uid: "{{=it.tmpo.usr.uid}}",
-								en: en,
-								ot: t.doe.className
-							});
-						}
-						o.push ({
-							erp: en,
-							tim: dco.utTim.format(new Date, "datetim3"),
-							total: dco.total
-						});
+					if (u) {
+						if (n) {
+							if (u.match(/^\d{5}$/)) {
+								var s, r, o = [];
+								for (s in dco.dat) {
+									t  = dco.dat[s];
+									o.push ({
+										sn: t.sn,
+										tim: t.tim,
+										stu: "领料",
+										nam: n,
+										uid: u,
+										opNam: "{{=it.tmpo.usr.nam}}",
+										opUid: "{{=it.tmpo.usr.uid}}"
+									});
+								}
 
-						r = dco.utJson.toObj(dco.ajx.post("{{=it.tmpo.url.rout}}push/", "o=" + dco.utJson.toJson(o)));
-						if (r.ok) {
-							location.href = "{{=it.tmpo.url.rout}}qry_erpInfo/?en=" + en;
+								r = dco.utJson.toObj(dco.ajx.post("{{=it.tmpo.url.rout}}push/", "o=" + dco.utJson.toJson(o)));
+								if (r.ok) {
+									location.href = "{{=it.tmpo.url.rout}}hom/";
+								} else {
+									dco.memo.show("提交失败！");
+								}
+							} else {
+								dco.memo.show("工号必须为五位数字！");
+							}
 						} else {
-							dco.memo.show("提交失败！");
+							dco.memo.show("领用人姓名不能为空！");
 						}
 					} else {
-						dco.memo.show("ERP单号不能为空！");
+						dco.memo.show("领用人工号不能为空！");
 					}
 				}
 			}

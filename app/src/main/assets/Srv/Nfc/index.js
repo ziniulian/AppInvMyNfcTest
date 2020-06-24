@@ -69,12 +69,57 @@ r.get("/qry_nfc/", function (req, res, next) {
 		// LZR.fillPro(req, "qpobj.tmpo").usr = req.session.usr;
 		var o = LZR.fillPro(req, "qpobj.tmpo.qry");
 		o.k = "tim";
+		o.cond = "{\"sn\":{\"$exists\":true}}";
 		o.sort = -1;
 		o.size = 20;
 		// o.cond = tools.utJson.toJson({typ: "info"});
 		next();
 	} else {
 		res.redirect(req.baseUrl + "/signIn/");
+	}
+});
+
+r.get("/qry_erp/", function (req, res, next) {
+	if (req.session.usr) {
+		for (var i = 0; i < req.session.usr.cls.length; i ++) {
+			if (req.session.usr.cls[i] === 4) {
+				LZR.fillPro(req, "qpobj.tmpo").usr = req.session.usr;
+				var o = LZR.fillPro(req, "qpobj.tmpo.qry");
+				o.k = "tim";
+				o.cond = "{\"erp\":{\"$exists\":true}}";
+				o.sort = -1;
+				o.size = 20;
+				next();
+				return;
+			}
+		}
+		res.redirect(req.baseUrl + "/hom/");
+	} else {
+		res.redirect(req.baseUrl + "/signIn/");
+	}
+});
+
+r.get("/qry_erpInfo/", function (req, res, next) {
+	var en = req.query.en;
+	if (en && req.session.usr) {
+		for (var i = 0; i < req.session.usr.cls.length; i ++) {
+			if (req.session.usr.cls[i] === 4) {
+				var o = LZR.fillPro(req, "qpobj.tmpo");
+				o.usr = req.session.usr;
+				o.en = en;
+
+				o = LZR.fillPro(req, "qpobj.tmpo.qry");
+				o.k = "tim";
+				o.cond = "{\"en\":\"" + en + "\"}";
+				o.sort = -1;
+				o.size = 20;
+				next();
+				return;
+			}
+		}
+		res.redirect(req.baseUrl + "/hom/");
+	} else {
+		res.redirect(req.baseUrl + "/hom/");
 	}
 });
 
@@ -123,7 +168,8 @@ r.get("/hom/", function (req, res, next) {
 });
 
 // 出货页用户权限检查
-r.get("/out/", function (req, res, next) {
+r.get(/^\/((out)|(lend)|(rtn))\/$/, function (req, res, next) {
+// console.log(req.params);
 	if (req.session.usr) {
 		for (var i = 0; i < req.session.usr.cls.length; i ++) {
 			if (req.session.usr.cls[i] === 4) {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>出货</title>
+		<title>归还</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
 		<meta charset="utf-8" />
 
@@ -57,14 +57,6 @@
 	<body>
 		<div id="boso" class="boso">
 			<div class="logo">
-				<input id="enDom" type="text" placeholder="请输入ERP单号" onfocus="this.select();"/>
-				&nbsp;&nbsp;&nbsp;&nbsp;
-				<!-- <select id="facDom">
-					<option>A厂商</option>
-					<option>B厂商</option>
-					<option>C厂商</option>
-				</select> -->
-				&nbsp;&nbsp;&nbsp;&nbsp;
 				<a href="javascript: dco.push();">提交</a>
 				<span id="numDom" class="num">0</span>
 			</div>
@@ -190,37 +182,23 @@
 			},
 
 			push: function () {
-				var en = enDom.value;
-				if (dco.total) {
-					if (en) {
-						var s, r, o = [];
-						for (s in dco.dat) {
-							t  = dco.dat[s];
-							o.push ({
-								sn: t.sn,
-								tim: t.tim,
-								stu: "出货",
-								nam: "{{=it.tmpo.usr.nam}}",
-								uid: "{{=it.tmpo.usr.uid}}",
-								en: en,
-								ot: t.doe.className
-							});
-						}
-						o.push ({
-							erp: en,
-							tim: dco.utTim.format(new Date, "datetim3"),
-							total: dco.total
-						});
+				var s, r, o = [];
+				for (s in dco.dat) {
+					t  = dco.dat[s];
+					o.push ({
+						sn: t.sn,
+						tim: t.tim,
+						stu: "归还",
+						nam: "{{=it.tmpo.usr.nam}}",
+						uid: "{{=it.tmpo.usr.uid}}"
+					});
+				}
 
-						r = dco.utJson.toObj(dco.ajx.post("{{=it.tmpo.url.rout}}push/", "o=" + dco.utJson.toJson(o)));
-						if (r.ok) {
-							location.href = "{{=it.tmpo.url.rout}}qry_erpInfo/?en=" + en;
-						} else {
-							dco.memo.show("提交失败！");
-						}
-					} else {
-						dco.memo.show("ERP单号不能为空！");
-					}
+				r = dco.utJson.toObj(dco.ajx.post("{{=it.tmpo.url.rout}}push/", "o=" + dco.utJson.toJson(o)));
+				if (r.ok) {
+					location.href = "{{=it.tmpo.url.rout}}hom/";
+				} else {
+					dco.memo.show("提交失败！");
 				}
 			}
 		};

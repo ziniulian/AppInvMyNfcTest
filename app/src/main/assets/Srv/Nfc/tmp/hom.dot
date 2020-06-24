@@ -31,6 +31,9 @@
 			{{~it.tmpo.usr.cls:n:i}}
 				{{? (n === 4)}}
 					<br/><br/><a target="_blank" href="{{=it.tmpo.url.rout}}out/">出货</a>
+					<br/><br/><a target="_blank" href="{{=it.tmpo.url.rout}}qry_erp/">ERP查询</a>
+					<br/><br/><a target="_blank" href="{{=it.tmpo.url.rout}}lend/">领料</a>
+					<br/><br/><a target="_blank" href="{{=it.tmpo.url.rout}}rtn/">归还</a>
 				{{?}}
 				{{? n === 2}}
 					<br/><br/><a target="_blank" href="{{=it.tmpo.url.rout}}qry_base/">数据库</a>
