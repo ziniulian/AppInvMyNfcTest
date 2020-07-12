@@ -14,6 +14,7 @@ import java.util.List;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 import static com.google.zxing.BarcodeFormat.CODE_39;
+import static com.google.zxing.BarcodeFormat.QR_CODE;
 
 /**
  * 二维码页面
@@ -35,7 +36,7 @@ public class ScannerActivity extends AppCompatActivity implements ZXingScannerVi
 		// 自定义扫码模式
 		formats = new ArrayList<>();
 		formats.add(CODE_39);	// 条形码
-		// formats.add(QR_CODE);	// 二维码
+		formats.add(QR_CODE);	// 二维码
 		mZXingScannerView.setFormats(formats);
 	}
 
